@@ -1,0 +1,2902 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAAT Exam Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e1a;--sf:#111827;--sf2:#1a2234;--sf3:#1e2d45;--bd:#2a3a52;--bd2:#3a4f6a;
+  --tx:#e8f0fe;--mt:#6b82a8;--dm:#4a6080;
+  --pass:#22c55e;--pbg:#052e16;--pbd:#16a34a;
+  --ac:#3b82f6;--ac2:#60a5fa;--am:#f59e0b;--pu:#a78bfa;--re:#ef4444;
+  --mn:'JetBrains Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px}
+/* HEADER */
+.hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 20px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;gap:10px}
+.logo{font-family:var(--mn);font-size:13px;font-weight:700;color:var(--ac2);letter-spacing:.08em;white-space:nowrap}
+.logo span{color:var(--mt);font-weight:400}
+.hr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:5px;font-size:11px;font-family:var(--mn);
+  padding:3px 10px;border-radius:20px;border:1px solid var(--bd);color:var(--mt);transition:all .3s}
+.pill.ok{border-color:var(--pass);color:var(--pass)}.pill.sy{border-color:var(--am);color:var(--am)}
+.pill.er{border-color:var(--re);color:var(--re)}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.sy .dot{animation:pu .8s ease-in-out infinite}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.25}}
+.btn{border:1px solid var(--bd);border-radius:6px;padding:5px 11px;font-family:'Sarabun',sans-serif;
+  font-size:12px;font-weight:600;cursor:pointer;background:transparent;transition:all .15s;white-space:nowrap}
+.btn.b{color:var(--ac2);border-color:rgba(96,165,250,.4)}.btn.b:hover{background:rgba(59,130,246,.1)}
+.btn.a{color:var(--am);border-color:rgba(245,158,11,.4)}.btn.a:hover{background:rgba(245,158,11,.08)}
+/* LAYOUT */
+.lay{display:flex;height:calc(100vh - 52px)}
+/* SIDEBAR */
+.sb{width:186px;flex-shrink:0;background:var(--sf);border-right:1px solid var(--bd);overflow-y:auto;padding:10px 0}
+.sbl{font-family:var(--mn);font-size:10px;font-weight:700;color:var(--dm);letter-spacing:.08em;
+  padding:6px 14px 4px;text-transform:uppercase;margin-top:4px}
+.cb{display:flex;align-items:center;gap:6px;width:100%;padding:8px 14px;background:transparent;
+  border:none;cursor:pointer;color:var(--mt);font-family:'Sarabun',sans-serif;font-size:12px;
+  font-weight:500;text-align:left;transition:all .1s;border-left:3px solid transparent}
+.cb:hover{background:var(--sf2);color:var(--tx)}.cb.ac{background:var(--sf3);color:var(--ac2);border-left-color:var(--ac)}
+.bj{margin-left:auto;font-family:var(--mn);font-size:10px;color:var(--dm)}.cb.ac .bj{color:var(--ac)}
+/* MAIN */
+.mn{flex:1;overflow:auto}
+.chdr{background:var(--sf2);border-bottom:1px solid var(--bd);padding:12px 20px;
+  display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+.ct{font-family:var(--mn);font-size:17px;font-weight:700}
+.ctag{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;
+  border-radius:4px;background:rgba(59,130,246,.15);color:var(--ac2);border:1px solid rgba(59,130,246,.3)}
+.sg{display:flex;gap:12px;margin-left:auto}
+.sv{font-family:var(--mn);font-size:14px;font-weight:700;color:var(--pu)}
+.sl{font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:.05em}
+/* TABLE */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:max-content;min-width:100%;font-size:12px}
+thead th{background:var(--sf2);color:var(--mt);font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;padding:9px 5px;text-align:center;
+  border-bottom:2px solid var(--bd2);white-space:nowrap;position:sticky;top:0;z-index:10}
+thead th:first-child{text-align:left;padding-left:16px;min-width:210px;
+  position:sticky;left:0;z-index:20;background:var(--sf2)}
+tbody tr{border-bottom:1px solid var(--bd);transition:background .1s}
+tbody tr:hover{background:rgba(59,130,246,.04)}
+td{padding:7px 5px;text-align:center;vertical-align:middle}
+td:first-child{text-align:left;padding-left:16px;font-weight:500;position:sticky;
+  left:0;background:var(--bg);z-index:5;white-space:nowrap}
+tbody tr:hover td:first-child{background:var(--sf)}
+/* TOGGLE CELL */
+.tc{width:34px;height:24px;border-radius:4px;border:1px solid #374151;background:transparent;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;transition:all .12s;color:transparent;
+  user-select:none;position:relative}
+.tc:hover{border-color:var(--bd2);background:var(--sf3)}
+.tc.pass{background:var(--pbg);border-color:var(--pbd);color:var(--pass)}
+.tc.pass:hover{background:#053a1a}
+.tc.sv::after{content:'';position:absolute;inset:0;border-radius:3px;
+  border:2px solid var(--am);border-top-color:transparent;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* PROGRESS */
+.pd{padding:7px 10px}
+.pw{display:flex;align-items:center;gap:7px;min-width:90px}
+.pb{flex:1;height:4px;background:var(--sf3);border-radius:2px;overflow:hidden}
+.pf{height:100%;border-radius:2px;transition:width .3s}
+.pp{font-family:var(--mn);font-size:11px;font-weight:700;min-width:36px;text-align:right}
+/* OVERVIEW */
+.og{padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px}
+.oc{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px 18px;
+  cursor:pointer;transition:all .12s}
+.oc:hover{border-color:var(--ac);transform:translateY(-1px)}
+.ocl{font-family:var(--mn);font-size:14px;font-weight:700;margin-bottom:2px}
+.oct{font-size:10px;color:var(--am);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.ocp{font-family:var(--mn);font-size:22px;font-weight:700;line-height:1}
+.ocs{font-size:10px;color:var(--mt);margin-top:4px}
+.ob{width:100%;height:3px;background:var(--sf3);border-radius:2px;margin-top:8px;overflow:hidden}
+/* TOAST */
+#toast{position:fixed;bottom:20px;right:20px;z-index:500;background:var(--sf);
+  border:1px solid var(--bd2);border-radius:8px;padding:11px 16px;font-size:12px;
+  transform:translateY(70px);opacity:0;transition:all .2s;pointer-events:none;max-width:280px}
+#toast.sh{transform:translateY(0);opacity:1}
+#toast.ok{border-color:var(--pass)}.toast.er{border-color:var(--re)}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="logo">CAAT <span>/ EXAM TRACKER</span></div>
+  <div class="hr">
+    <div class="pill sy" id="pill"><span class="dot"></span><span id="plbl">กำลังโหลด...</span></div>
+    <button class="btn b" onclick="pull()">↓ ดึงข้อมูล</button>
+    <button class="btn b" onclick="pushAll()">↑ อัปโหลด</button>
+    <button class="btn a" onclick="exportCSV()">⬇ CSV</button>
+  </div>
+</header>
+<div class="lay">
+  <nav class="sb">
+    <div class="sbl" style="margin-top:0">ภาพรวม</div>
+    <button class="cb ac" onclick="showOv(this)" id="btn-ov">📊 Overview</button>
+<div class="sbl">CPL-A / CPL+IR</div>
+    <button class="cb" onclick="showC('AP124',this)" id="btn-AP124">AP124 <span class="bj" id="bj-AP124">—</span></button>
+    <button class="cb" onclick="showC('AP125',this)" id="btn-AP125">AP125 <span class="bj" id="bj-AP125">—</span></button>
+    <button class="cb" onclick="showC('AP126',this)" id="btn-AP126">AP126 <span class="bj" id="bj-AP126">—</span></button>
+    <button class="cb" onclick="showC('AP127',this)" id="btn-AP127">AP127 <span class="bj" id="bj-AP127">—</span></button>
+    <button class="cb" onclick="showC('AP128',this)" id="btn-AP128">AP128 <span class="bj" id="bj-AP128">—</span></button>
+    <button class="cb" onclick="showC('AP129',this)" id="btn-AP129">AP129 <span class="bj" id="bj-AP129">—</span></button>
+    <button class="cb" onclick="showC('AP130',this)" id="btn-AP130">AP130 <span class="bj" id="bj-AP130">—</span></button>
+<div class="sbl">CPL-H</div>
+    <button class="cb" onclick="showC('HP56',this)" id="btn-HP56">HP56 <span class="bj" id="bj-HP56">—</span></button>
+    <button class="cb" onclick="showC('HP57',this)" id="btn-HP57">HP57 <span class="bj" id="bj-HP57">—</span></button>
+<div class="sbl">PPL</div>
+    <button class="cb" onclick="showC('PPL37',this)" id="btn-PPL37">PPL37 <span class="bj" id="bj-PPL37">—</span></button>
+    <button class="cb" onclick="showC('PPL38',this)" id="btn-PPL38">PPL38 <span class="bj" id="bj-PPL38">—</span></button>
+    <button class="cb" onclick="showC('PPL39',this)" id="btn-PPL39">PPL39 <span class="bj" id="bj-PPL39">—</span></button>
+    <button class="cb" onclick="showC('PPL(H)-5',this)" id="btn-PPL(H)-5">PPL(H)-5 <span class="bj" id="bj-PPL(H)-5">—</span></button>
+  </nav>
+  <main class="mn" id="main"></main>
+</div>
+<div id="toast"></div>
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwZt7telhuVGk3cTSHQmmNfYHyQtBQGUsG8EWbvC17KUhNNHICKfPIatCPwJJ2qIN4P/exec';
+
+const DATA = {
+  "AP124": {
+    "type": "CPL-A",
+    "subj": [
+      "010 AL",
+      "021 AGK-A/S/P",
+      "022 AGK-I",
+      "031 M&B",
+      "032 PERF-A",
+      "033 FPL",
+      "040 HPL",
+      "050 MET",
+      "061 GNAV",
+      "062 RNAV",
+      "071 OPS",
+      "081 POF",
+      "090 COM",
+      "ME"
+    ],
+    "stu": [
+      {
+        "n": "MR. CHANATHIP THONGARAM",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. POONYAPAT WONGPAYAK",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. THITIWAT OUNHASUTTIYANON",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. GARUNPHON TASSANAVIROJ",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. SORRAWIT THAPORN",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. PHUMNAPAT PHOLNAK",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. NAFEEN MACHA",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MS. CHANISA SUEBNIPON",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. JAKRAPHAT TONGCHIM",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  "AP125": {
+    "type": "CPL+IR",
+    "subj": [
+      "CPL/010 AL",
+      "CPL/021 AGK-A/S/P",
+      "CPL/022 AGK-I",
+      "CPL/031 M&B",
+      "CPL/032 PERF-A",
+      "CPL/033 FPL",
+      "CPL/040 HPL",
+      "CPL/050 MET",
+      "CPL/061 GNAV",
+      "CPL/062 RNAV",
+      "CPL/071 OPS",
+      "CPL/081 POF",
+      "CPL/090 COM",
+      "CPL/ME",
+      "IR/010 AL",
+      "IR/022 AGK-I",
+      "IR/033 FPL",
+      "IR/040 HPL",
+      "IR/050 MET",
+      "IR/062 RNAV",
+      "IR/090 COM"
+    ],
+    "stu": [
+      {
+        "n": "Flt.Lt. Sirapop Ditchaithat",
+        "r": [
+          true,
+          false,
+          false,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Plt.Off. Daragron Kangkun",
+        "r": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Plt.Off. Nithi Seepaiboon",
+        "r": [
+          false,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          false,
+          true,
+          false,
+          true
+        ]
+      },
+      {
+        "n": "Plt.Off. Jaturon Rattanasang",
+        "r": [
+          true,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  "AP126": {
+    "type": "CPL-A",
+    "subj": [
+      "010 AL",
+      "021 AGK-A/S/P",
+      "022 AGK-I",
+      "031 M&B",
+      "032 PERF-A",
+      "033 FPL",
+      "040 HPL",
+      "050 MET",
+      "061 GNAV",
+      "062 RNAV",
+      "071 OPS",
+      "081 POF",
+      "090 COM",
+      "ME"
+    ],
+    "stu": [
+      {
+        "n": "Gravitat Chaiyakul",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Kantapong Arunaditya",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Kananon Vanboonyakit",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Chanol Trailertsmut",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Napath Thoungvittayasutee",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Nabhadr Punyashthiti",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Nattarat Gayapun",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Nuttawat Rakcheep",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Thanachote Angkalakkana",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Thanathip Wongsorod",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Napon Rungrueangwattanachot",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Nanjitra Donfai",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Paramutt Chianmingkwan",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Pran Phrajunpanich",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Pritasna Makornkewkeyoon",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Prem Ponvilai",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Pongsakorn Anawatchakul",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Patcharanan Duangkaew",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Porntreetra Rattanapansri",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Pattharadej Sansara",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Pakorn Wangsuekul",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Maruay Boonthanomraks",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Rakchon Kumpiranont",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Rangsiman Suwunnatee",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Wattikorn Kumnertsittisaree",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Siwat Chobthang",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Subhawichaya Sanpakit",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Sarach Chotewongsuroj",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      }
+    ]
+  },
+  "AP127": {
+    "type": "CPL-A",
+    "subj": [
+      "010 AL",
+      "021 AGK-A/S/P",
+      "022 AGK-I",
+      "031 M&B",
+      "032 PERF-A",
+      "033 FPL",
+      "040 HPL",
+      "050 MET",
+      "061 GNAV",
+      "062 RNAV",
+      "071 OPS",
+      "081 POF",
+      "090 COM",
+      "ME"
+    ],
+    "stu": [
+      {
+        "n": "Akaravit Khwanngam",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "ANUSORN TANMETHA",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Awirut Sakcharoen",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Bulaset Chainontharat",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Jirayu Amornsatitpan",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Khobpong Werawong",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Kitthanya Thiaphairat",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Korn Suwannaraks",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Kraisee Luecha",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Krit Laohamethanee",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Maethaphan Ruengprapaikijseree",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "NAPON SAWAENGPAK",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "NATPAKALP KONGVANICHSAKUL",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Nuttaphat Kianmatee",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Panithan Veeratanaporn",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Pichakorn Jirapinyo",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Pornskul Dulya",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Puwadet Hempattawee",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Setasit Pittayathikhun",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Siwakorn Pholphukrat",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Sornsorawitch Chanpradubfa",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Supawan Adchariyapluk",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Takorn Chuntanapap",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Teerawaj Chitwicheankul",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Vasaphon Sinsab",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "n": "Watcharaphol Vongnoi",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Watcharapol Auttakit",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Watcharapong Chuaidu",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      }
+    ]
+  },
+  "AP128": {
+    "type": "CPL+IR",
+    "subj": [
+      "CPL/010 AL",
+      "CPL/021 AGK-A/S/P",
+      "CPL/022 AGK-I",
+      "CPL/031 M&B",
+      "CPL/032 PERF-A",
+      "CPL/033 FPL",
+      "CPL/040 HPL",
+      "CPL/050 MET",
+      "CPL/061 GNAV",
+      "CPL/062 RNAV",
+      "CPL/071 OPS",
+      "CPL/081 POF",
+      "CPL/090 COM",
+      "CPL/ME",
+      "IR/010 AL",
+      "IR/022 AGK-I",
+      "IR/033 FPL",
+      "IR/040 HPL",
+      "IR/050 MET",
+      "IR/062 RNAV",
+      "IR/090 COM"
+    ],
+    "stu": [
+      {
+        "n": "Plt.Off. Kridsada Kamnoet",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Plt.Off. Kittipat Mutitatam",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Plt.Off. Dolsakul Satachaiviruj",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Plt.Off. Ekkasit Budda",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  "AP129": {
+    "type": "CPL-A",
+    "subj": [
+      "010 AL",
+      "021 AGK-A/S/P",
+      "022 AGK-I",
+      "031 M&B",
+      "032 PERF-A",
+      "033 FPL",
+      "040 HPL",
+      "050 MET",
+      "061 GNAV",
+      "062 RNAV",
+      "071 OPS",
+      "081 POF",
+      "090 COM",
+      "ME"
+    ],
+    "stu": [
+      {
+        "n": "AKINKORN LIMSILATHAM",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "CHAIPAT TUBTIMTO",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "MARC NAWIN PEPE WILLEMS",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          false,
+          true,
+          true,
+          false,
+          false,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "MATHANAPHADA PRASERTDEE",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "NALAT SIPHAIROCH",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "NATTHAWARA LEKKLA",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "RAVEEVIT ROENGNIRUNSATHIT",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "SURATHEE SITTHI",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "TORN MAROM",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "TUPPAWAT SAJJANIT",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "VIPHARATH CHAROENSUKANUN",
+        "r": [
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "WANUT SANGTIANPRAPAI",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "WARITTHA BORIBOON",
+        "r": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      }
+    ]
+  },
+  "AP130": {
+    "type": "CPL-A",
+    "subj": [
+      "010 AL",
+      "021 AGK-A/S/P",
+      "022 AGK-I",
+      "031 M&B",
+      "032 PERF-A",
+      "033 FPL",
+      "040 HPL",
+      "050 MET",
+      "061 GNAV",
+      "062 RNAV",
+      "071 OPS",
+      "081 POF",
+      "090 COM",
+      "ME"
+    ],
+    "stu": [
+      {
+        "n": "MR. NATHAKORN PUEKPOONPOL",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. RACHAPON RUANGRIT",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. PHENTHAI SOPA",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. ANAWAT TAITDHUM",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. NIPITPHOL CHOLPRASERTSUK",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MS. PISSINEE TOAMORNPHAN",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MS. JOMNAPHAS SOMBATTHAI",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. SIVAPHOT SINGCHAROENCHAI",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. NONPAWICH KRUEAKAMPLIW",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. PATHAPOL SUKPULLOPRAT",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. TEERAPONG KITAYANUGOON",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. JETSADAKORN PHATINAWIN",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. NITHI CHUENTHANAWUT",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  "HP56": {
+    "type": "CPL-H",
+    "subj": [
+      "010 AL",
+      "021 AGK-A/S/P",
+      "022 AGK-I",
+      "031 M&B",
+      "033 FPL",
+      "034 PERF",
+      "040 HPL",
+      "050 MET",
+      "061 GNAV",
+      "062 RNAV",
+      "071 OPS",
+      "082 POF",
+      "090 COM"
+    ],
+    "stu": [
+      {
+        "n": "Pol.Capt. KASIDIT KAEWSATIEN",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Pol.Capt. NATTAPONG KHAMCHOOSONG",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Pol.Capt. THITIPONG HONGSACHART",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Pol.Capt. APICHA CHINKANGSADAN",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Pol.Capt. ADISORN DITJAROEN",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Sub Lt. PARADORN WAEKRATOK",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Sub Lt. WARUT WATCHARASING",
+        "r": [
+          true,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      },
+      {
+        "n": "Sub Lt. YANAVIT JITTARAT",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Sub Lt. ARAN BUAIN",
+        "r": [
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          false
+        ]
+      }
+    ]
+  },
+  "HP57": {
+    "type": "CPL-H",
+    "subj": [
+      "010 AL",
+      "021 AGK-A/S/P",
+      "022 AGK-I",
+      "031 M&B",
+      "033 FPL",
+      "034 PERF",
+      "040 HPL",
+      "050 MET",
+      "061 GNAV",
+      "062 RNAV",
+      "071 OPS",
+      "082 POF",
+      "090 COM"
+    ],
+    "stu": [
+      {
+        "n": "Pol.Capt.Prechawut Nuritanont",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Pol.Capt.Thiphop Phadungnam",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Pol.Capt.Chisanupong Nansathit",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Pol.Capt.Sirawit Klinfueang",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Pol.Capt.Yothin Yotee",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Sub Lt.Nuttapong Supasri",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Sub Lt.Nakarin Phudkoed",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Sub Lt.Wachirawit Mahaphatthananon",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "Wg.Cdr.Poonarat Boonrawd",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  "PPL37": {
+    "type": "PPL-A",
+    "subj": [
+      "010 AL",
+      "020 AGK",
+      "030 FPP",
+      "040 HPL",
+      "050 MET",
+      "060 NAV",
+      "070 OPS",
+      "081 POF",
+      "090 COM"
+    ],
+    "stu": [
+      {
+        "n": "MR. CHANATHIP THONGARAM",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  "PPL38": {
+    "type": "PPL-A",
+    "subj": [
+      "010 AL",
+      "020 AGK",
+      "030 FPP",
+      "040 HPL",
+      "050 MET",
+      "060 NAV",
+      "070 OPS",
+      "081 POF",
+      "090 COM"
+    ],
+    "stu": [
+      {
+        "n": "MR. SUTACH RUANGSUTTIPAP",
+        "r": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true
+        ]
+      }
+    ]
+  },
+  "PPL39": {
+    "type": "PPL-A",
+    "subj": [
+      "010 AL",
+      "020 AGK",
+      "030 FPP",
+      "040 HPL",
+      "050 MET",
+      "060 NAV",
+      "070 OPS",
+      "081 POF",
+      "090 COM"
+    ],
+    "stu": [
+      {
+        "n": "MR. PICH SAEHENG",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  "PPL(H)-5": {
+    "type": "PPL-H",
+    "subj": [
+      "010 AL",
+      "020 AGK",
+      "030 FPP",
+      "040 HPL",
+      "050 MET",
+      "060 NAV",
+      "070 OPS",
+      "082 POF",
+      "090 COM"
+    ],
+    "stu": [
+      {
+        "n": "MR. TARAY PHUKAOTHONGKUM",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      {
+        "n": "MR. IAN BARLOW",
+        "r": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    ]
+  }
+};
+
+// STATE
+let S = {};
+function initS() {
+  try { const s = localStorage.getItem('caatv6'); if(s) S = JSON.parse(s); } catch(e){}
+  for (const c in DATA) {
+    if (!S[c] || S[c].length !== DATA[c].stu.length)
+      S[c] = DATA[c].stu.map(s => s.r.slice());
+  }
+}
+const save = () => localStorage.setItem('caatv6', JSON.stringify(S));
+
+// STATUS
+function setP(cls, lbl) {
+  document.getElementById('pill').className = 'pill ' + cls;
+  document.getElementById('plbl').textContent = lbl;
+}
+
+// PULL
+async function pull() {
+  setP('sy','กำลังโหลด...');
+  try {
+    const j = await fetch(API + '?action=load').then(r => r.json());
+    if (!j.ok) throw new Error(j.error);
+    for (const c in j.data) {
+      const rows = j.data[c];
+      if (!rows || !DATA[c]) continue;
+      S[c] = DATA[c].stu.map((_,i) => rows[i] ? rows[i].results.slice() : DATA[c].stu[i].r.slice());
+    }
+    save(); updBadges();
+    if (cur) renderC(cur);
+    setP('ok','ซิงค์แล้ว'); toast('✓ โหลดข้อมูลสำเร็จ','ok');
+  } catch(e) { setP('er','Error'); toast('❌ '+e.message,'er'); }
+}
+
+// TOGGLE HELPER — handles class names with special chars like PPL(H)-5
+function togBtn(btn){
+  const cls=btn.dataset.cls;
+  const si=parseInt(btn.dataset.si);
+  const ji=parseInt(btn.dataset.ji);
+  tog(cls,si,ji);
+}
+
+// TOGGLE
+async function tog(cls, si, ji) {
+  S[cls][si][ji] = !S[cls][si][ji];
+  const v = S[cls][si][ji];
+  const cell = document.getElementById(`c-${cls}-${si}-${ji}`);
+  if (cell) { cell.classList.toggle('pass',v); cell.textContent = v?'✓':''; }
+  updRow(cls,si); updHdr(cls); updBadges(); save();
+  setP('sy','บันทึก...');
+  if (cell) cell.classList.add('sv');
+  try {
+    const j = await fetch(API,{method:'POST',
+      body:JSON.stringify({action:'toggle',cls,studentIdx:si,subjIdx:ji,value:v})})
+      .then(r=>r.json());
+    if(!j.ok) throw new Error(j.error);
+    setP('ok','บันทึกแล้ว');
+  } catch(e) { setP('er','Sync fail'); toast('⚠️ บันทึก Sheet ไม่สำเร็จ','er'); }
+  finally { if(cell) cell.classList.remove('sv'); }
+}
+
+// PUSH ALL
+async function pushAll() {
+  setP('sy','อัปโหลด...');
+  try {
+    const j = await fetch(API,{method:'POST',body:JSON.stringify({action:'saveAll',state:S})}).then(r=>r.json());
+    if(!j.ok) throw new Error(j.error);
+    setP('ok','อัปโหลดแล้ว'); toast(`✓ อัปโหลด ${j.changed} ช่อง`,'ok');
+  } catch(e) { setP('er','Error'); toast('❌ '+e.message,'er'); }
+}
+
+// HELPERS
+const bc = p => p>=85?'#22c55e':p>=60?'#f59e0b':'#ef4444';
+function rPct(c,i){ const r=S[c][i]||[]; const n=DATA[c].subj.length; return n?r.filter(Boolean).length/n*100:0; }
+function cPct(c){ const rs=S[c]||[]; const n=DATA[c].subj.length; if(!n||!rs.length)return 0;
+  return rs.reduce((a,r)=>a+(r||[]).filter(Boolean).length,0)/(rs.length*n)*100; }
+function updBadges(){ for(const c in DATA){ const el=document.getElementById('bj-'+c); if(el) el.textContent=Math.round(cPct(c))+'%'; } }
+function updRow(c,i){ const p=rPct(c,i),cl=bc(p);
+  const b=document.getElementById(`bar-${c}-${i}`); const t=document.getElementById(`pct-${c}-${i}`);
+  if(b){b.style.width=p+'%';b.style.background=cl;} if(t){t.textContent=Math.round(p)+'%';t.style.color=cl;} }
+function updHdr(c){ const rs=S[c]||[]; const n=DATA[c].subj.length;
+  const p=rs.reduce((a,r)=>a+(r||[]).filter(Boolean).length,0); const t=rs.length*n; const pct=t?p/t*100:0;
+  const e1=document.getElementById('hpct'); const e2=document.getElementById('hpass');
+  if(e1)e1.textContent=Math.round(pct)+'%'; if(e2)e2.textContent=p+'/'+t; }
+function toast(msg,cls='ok'){ const el=document.getElementById('toast');
+  el.textContent=msg; el.className='sh '+cls; clearTimeout(el._t); el._t=setTimeout(()=>el.className='',3000); }
+
+// RENDER
+let cur = null;
+function renderC(cls) {
+  const m=DATA[cls]; const rs=S[cls]||[]; const subj=m.subj; const n=subj.length;
+  const passed=rs.reduce((a,r)=>a+(r||[]).filter(Boolean).length,0);
+  const total=rs.length*n; const p=total?passed/total*100:0;
+  let ths=`<th>${cls} — ชื่อ</th>`; subj.forEach(s=>ths+=`<th>${s}</th>`); ths+=`<th>Progress</th>`;
+  let tbs='';
+  m.stu.forEach((stu,si)=>{
+    const r=rs[si]||[]; const pp=rPct(cls,si); const cc=bc(pp);
+    let cells='';
+    for(let ji=0;ji<n;ji++){
+      const v=r[ji]||false;
+      const clsEnc=encodeURIComponent(cls);
+      cells+=`<td><button class="tc ${v?'pass':''}" id="c-${cls}-${si}-${ji}" data-cls="${cls}" data-si="${si}" data-ji="${ji}" onclick="togBtn(this)">${v?'✓':''}</button></td>`;
+    }
+    tbs+=`<tr><td>${stu.n}</td>${cells}<td class="pd"><div class="pw">
+      <div class="pb"><div class="pf" id="bar-${cls}-${si}" style="width:${pp}%;background:${cc}"></div></div>
+      <span class="pp" id="pct-${cls}-${si}" style="color:${cc}">${Math.round(pp)}%</span>
+    </div></td></tr>`;
+  });
+  document.getElementById('main').innerHTML=`
+    <div class="chdr">
+      <div class="ct">${cls}</div><div class="ctag">${m.type}</div>
+      <div class="sg">
+        <div><div class="sv" id="hpct">${Math.round(p)}%</div><div class="sl">Overall</div></div>
+        <div><div class="sv" id="hpass">${passed}/${total}</div><div class="sl">ผ่าน</div></div>
+        <div><div class="sv">${m.stu.length}</div><div class="sl">นักเรียน</div></div>
+        <div><div class="sv">${n}</div><div class="sl">วิชา</div></div>
+      </div>
+    </div>
+    <div class="tw"><table><thead><tr>${ths}</tr></thead><tbody>${tbs}</tbody></table></div>`;
+}
+
+function showC(cls,btn){
+  cur=cls;
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('ac'));
+  btn.classList.add('ac'); renderC(cls);
+}
+function showOv(btn){
+  cur=null;
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('ac'));
+  btn.classList.add('ac');
+  let html='<div class="og">';
+  for(const c in DATA){
+    const m=DATA[c]; const p=cPct(c); const cl=bc(p);
+    html+=`<div class="oc" onclick="document.getElementById('btn-${c}').click()">
+      <div class="ocl">${c}</div><div class="oct">${m.type}</div>
+      <div class="ocp" style="color:${cl}">${Math.round(p)}%</div>
+      <div class="ocs">${m.stu.length} นักเรียน · ${m.subj.length} วิชา</div>
+      <div class="ob"><div style="height:100%;width:${p}%;background:${cl};border-radius:2px"></div></div>
+    </div>`;
+  }
+  document.getElementById('main').innerHTML=html+'</div>';
+}
+
+function exportCSV(){
+  let csv='';
+  for(const c in DATA){ const m=DATA[c];
+    csv+=`\n=== ${c} (${m.type}) ===\nชื่อ,${m.subj.join(',')},Progress\n`;
+    m.stu.forEach((stu,i)=>{
+      const r=S[c][i]||[];
+      csv+=stu.n+','+r.slice(0,m.subj.length).map(v=>v?'PASS':'NOT TAKEN').join(',')+','+Math.round(rPct(c,i))+'%\n';
+    });
+  }
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download='CAAT_Progress.csv'; a.click();
+}
+
+// INIT
+initS(); updBadges();
+showOv(document.getElementById('btn-ov'));
+pull();
+</script>
+</body>
+</html>
